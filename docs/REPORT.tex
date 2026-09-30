@@ -1,0 +1,199 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{siunitx}
+\usepackage{tabularx}
+\usepackage[
+    top=1cm,
+    bottom=2.5cm,
+    left=2.5cm,
+    right=2.5cm
+]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{caption}
+
+\title{
+    \textbf{SODS Final Project - Group 21}\\[0.5em]
+    \large
+    \begin{tabular}{ccc}
+       Erfan Taheri s360828
+    \end{tabular}
+}
+
+\begin{document}
+
+\date{}
+
+\maketitle
+\vspace{-2cm}
+\section{Baseline Synthesis}
+
+\begin{table}[h]
+\centering
+\caption{Baseline synthesis results}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Clock period (ns) &  2.0\\
+Area ($ \mu m^2$) &  38381.33\\
+Slack (ns) &  0.000203\\
+Leakage power (mW) &  \num{1.365e-5}\\
+Dynamic power (mW) &  \num{5.930e-3}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Power Optimization}
+
+\subsection{Clock-Gating}
+
+\begin{table}[h]
+\centering
+\caption{Clock-gating optimization results}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Area ($\mu m^2$) &  28276.83\\
+Slack (ns) &  0.000000\\
+Leakage power (mW) &  \num{8.637e-6}\\
+Dynamic power (mW) &  \num{4.437e-3}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Assumptions:} Only Low-VT cells are used, based on the project requirement. Using \texttt{compile\_ultra} instead of \texttt{compile} according to the labs.
+
+    \item \textbf{Dynamic Power (decreased significantly):}
+    Dynamic power decreases from \(\num{5.930}\,\text{mW}\) in the baseline synthesis to \(\num{4.437}\,\text{mW}\) after clock-gating optimization, corresponding to a reduction of about \(25.2\%\). Clock gating reduces unnecessary switching activity by preventing registers or register groups from toggling when their enable condition is inactive. However, the PrimeTime power breakdown shows that the largest measured reduction comes from the combinational logic. The combinational total power decreases from \(\num{3.238}\,\text{mW}\) to \(\num{1.819}\,\text{mW}\), while the clock-network power decreases from \(\num{1.420}\,\text{mW}\) to \(\num{1.279}\,\text{mW}\). This is consistent with the DC area report, which shows a large reduction in combinational cells, nets, and buffer/inverter cells. Therefore, the dynamic-power reduction is due to both reduced switching activity from clock gating and the smaller optimized implementation produced by \texttt{compile\_ultra}.
+
+    \item \textbf{Area (decreased drastically):}
+    The total cell area decreases from \(38382.24\,\mu m^2\) to \(28276.56\,\mu m^2\), corresponding to a reduction of about \(26.3\%\). The DC area report shows that the number of cells decreases from 10580 to 5945, and the number of combinational cells decreases from 9377 to 4846. The number of buffer/inverter cells also decreases strongly, from 3409 to 652. This indicates that the clock-gated implementation is structurally much smaller than the baseline. The reduction can be explained by the combined effect of clock-gating insertion, possible replacement of register-enable feedback multiplexers with shared integrated clock-gating cells, and the more aggressive restructuring and optimization performed by \texttt{compile\_ultra}.
+
+    \item \textbf{Static Power (decreased significantly):}
+    Leakage power decreases from \(\num{1.365e-2}\,\text{mW}\) to \(\num{8.637e-3}\,\text{mW}\), corresponding to a reduction of about \(36.7\%\). Since both implementations use only LVT cells, this reduction is not due to threshold-voltage optimization. Instead, it is mainly due to the smaller implementation after clock-gating and \texttt{compile\_ultra} optimization. The reduced number of cells and smaller total cell area lead to fewer leaking devices, reducing the total leakage power.
+
+    \item \textbf{Slack (remained approximately zero):}
+    The difference between the slack in the baseline synthesis and in the clock-gated implementation is very small, and both designs can be considered to meet timing with almost zero slack. This result is expected because \texttt{compile\_ultra}, used in this section, performs more aggressive area and power optimization than the \texttt{compile} command used in the baseline synthesis, while still satisfying the timing constraint. Therefore, the tool may reduce unnecessary positive slack by resizing or restructuring non-critical logic, leaving the design close to the timing boundary.
+\end{itemize}
+
+
+\subsection{Clock-Gating + Multi-VT}
+
+\begin{table}[h]
+\centering
+\caption{Clock-gating and Multi-VT optimization results}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Percentage of LVT cells (\%) &  10.53\\
+Percentage of SVT cells (\%) & 7.15 \\
+Percentage of HVT cells (\%) & 82.32 \\
+Area ($\mu m^2$) &  31294.98\\
+Slack (ns) &  0.000000\\
+Leakage power (mW) & \num{2.180e-6} \\
+Dynamic power (mW) & \num{4.852e-3} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{itemize}
+\item \textbf{Area increased:}
+The total cell area increases about (10.7\%). The DC area report shows that the number of cells increases from 5945 to 6858, while the number of sequential cells remains unchanged at 1066. Therefore, the additional cells are entirely combinational. In particular, the number of combinational cells increases from 4846 to 5759, and the number of buffer/inverter cells increases from 652 to 859. This indicates that the synthesis tool added or resized combinational logic, including extra buffers and inverters, to recover timing after replacing many fast LVT cells with slower SVT/HVT cells.
+
+```
+\item \textbf{Dynamic power increased:}
+The dynamic power increases corresponding to an increase of about \(9.35\%\). The PrimeTime power breakdown shows that this increase is mainly due to the combinational logic. The combinational total power increases from \(\num{1.819}\,\text{mW}\) to \(\num{2.310}\,\text{mW}\), while the clock-network and register power both slightly decrease. More specifically, the combinational switching power increases from \(\num{1.119}\,\text{mW}\) to \(\num{1.496}\,\text{mW}\). Therefore, the increase in dynamic power is mainly caused by the larger switched capacitance of the combinational logic. This is consistent with the higher number of cells, nets, buffers, and inverters in the Multi-VT implementation and the formula : $P_{dyn} = \alpha \cdot C_L \cdot V_{DD}^2 \cdot f$.
+
+\item \textbf{Static power decreased:}
+The leakage power decreases about \(74.8\%\). This is the expected result of Multi-VT optimization. In the clock-gating-only implementation, the design uses only LVT cells, which are fast but have higher leakage current. In the Multi-VT implementation, most of the design is mapped to HVT cells, with only a small percentage of LVT cells kept on timing-critical paths. Since HVT cells have a higher threshold voltage, their subthreshold leakage current is much lower. Therefore, replacing most LVT cells with HVT/SVT cells significantly reduces static power.
+
+\item \textbf{Slack stayed approximately zero:}
+In both implementations, the slack is approximately \(0\,\text{ns}\), meaning that the timing constraint is just met. This is expected because \texttt{compile\_ultra} optimizes the design while satisfying the clock-period constraint. In the Multi-VT case, the tool uses slower HVT/SVT cells where possible to reduce leakage, while compensating on timing-critical paths by using additional or stronger combinational logic. As a result, leakage power is reduced, but the design remains close to the timing boundary.
+
+
+\end{itemize}
+
+
+\section*{Appendix : Supporting Reports for Clock-Gating and Multi-VT Discussions}
+
+\begin{table}[h]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\caption{Evidence from DC and PrimeTime reports comparing baseline synthesis and clock-gating optimization}
+\begin{tabularx}{\textwidth}{llrrrX}
+\toprule
+\textbf{Source} & \textbf{Metric} & \textbf{Baseline} & \textbf{Ex2.1} & \textbf{Change} & \textbf{Interpretation} \\
+\midrule
+DC area report & Number of nets & 11097 & 6771 & -4326 & Fewer nets reduce switched capacitance. \\
+DC area report & Number of cells & 10580 & 5945 & -4635 & Clock-gated implementation is much smaller. \\
+DC area report & Combinational cells & 9377 & 4846 & -4531 & Large reduction in combinational logic. \\
+DC area report & Sequential cells & 1203 & 1066 & -137 & Sequential cell count also decreases. \\
+DC area report & Buffer/inverter cells & 3409 & 652 & -2757 & Large reduction in buffer/inverter logic. \\
+DC area report & Total cell area ($\mu m^2$) & 38382.24 & 28276.56 & -10105.68 & Area decreases by about 26.3\%. \\
+DC area report & Combinational area ($\mu m^2$) & 25634.44 & 16904.16 & -8730.28 & Area reduction is mainly combinational. \\
+DC area report & Buffer/inverter area ($\mu m^2$) & 5491.20 & 1079.00 & -4412.20 & Buffer/inverter area decreases significantly. \\
+\midrule
+PT power report & Internal power ($\mu$W) & 3.369 & 2.326 & -1.043 & Cell internal dynamic power decreases. \\
+PT power report & Net switching power ($\mu$W) & 2.560 & 2.111 & -0.449 & Net switching power decreases. \\
+PT power report & Dynamic power ($\mu$W) & 5.929 & 4.437 & -1.492 & Dynamic power decreases by about 25.2\%. \\
+PT power report & Leakage power ($\mu$W) & 0.01365 & 0.008637 & -0.005013 & Leakage decreases by about 36.7\%. \\
+PT power report & Total power ($\mu$W) & 5.943 & 4.445 & -1.498 & Total power decreases mainly due to dynamic power. \\
+\midrule
+PT power groups & Clock-network total power ($\mu$W) & 1.420 & 1.279 & -0.141 & Clock-network power decreases slightly. \\
+PT power groups & Register total power ($\mu W) & 1.285 & 1.347 & +0.062 & Register power slightly increases. \\
+PT power groups & Combinational total power ($\mu W) & 3.238 & 1.819 & -1.419 & Largest power reduction comes from combinational logic. \\
+PT power groups & Combinational switching power ($\mu$W) & 2.126 & 1.119 & -1.007 & Strong evidence of reduced switched capacitance. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\begin{table}[h]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\caption{Evidence from DC and PrimeTime reports comparing clock-gating-only and clock-gating + Multi-VT implementations}
+\begin{tabularx}{\textwidth}{llrrrX}
+\toprule
+\textbf{Source} & \textbf{Metric} & \textbf{Ex2.1} & \textbf{Ex2.2} & \textbf{Change} & \textbf{Interpretation} \\
+\midrule
+DC area report & Number of nets & 6771 & 7816 & +1045 & More nets increase switched capacitance. \\
+DC area report & Number of cells & 5945 & 6858 & +913 & Multi-VT implementation uses more cells. \\
+DC area report & Combinational cells & 4846 & 5759 & +913 & Increase is entirely in combinational logic. \\
+DC area report & Sequential cells & 1066 & 1066 & 0 & Register count is unchanged. \\
+DC area report & Buffer/inverter cells & 652 & 859 & +207 & Extra buffering contributes to capacitance. \\
+DC area report & Total cell area ($\mu m^2$) & 28276.56 & 31294.64 & +3018.08 & Area increases by about 10.7\%. \\
+DC area report & Combinational area ($\mu m^2$) & 16904.16 & 19754.80 & +2850.64 & Area increase is mainly combinational. \\
+DC area report & Buffer/inverter area ($\mu m^2$) & 1079.00 & 1445.60 & +366.60 & Buffer/inverter area increases significantly. \\
+\midrule
+PT power report & Internal power ($\mu$W) & 2.326 & 2.413 & +0.087 & Cell internal dynamic power increases slightly. \\
+PT power report & Net switching power ($\mu$W) & 2.111 & 2.439 & +0.328 & Main contributor to dynamic power increase. \\
+PT power report & Leakage power ($\mu$W) & 0.008637 & 0.002180 & -0.006457 & Leakage decreases by about 74.8\%. \\
+PT power report & Total power ($\mu$W) & 4.445 & 4.854 & +0.409 & Total power increases due to dynamic power. \\
+\midrule
+PT power groups & Clock-network total power ($\mu$W) & 1.279 & 1.235 & -0.044 & Clock network power decreases slightly. \\
+PT power groups & Register total power ($\mu$W) & 1.347 & 1.309 & -0.038 & Register power decreases slightly. \\
+PT power groups & Combinational total power ($\mu$W) & 1.819 & 2.310 & +0.491 & Dynamic increase comes from combinational logic. \\
+PT power groups & Combinational switching power ($\mu$W) & 1.119 & 1.496 & +0.377 & Strong evidence of larger switched capacitance. \\
+\midrule
+DC reference report & Full-adder cells & 240 & 371 & +131 & Mapped combinational logic becomes larger. \\
+DC reference report & NAND cells & 850 & 1102 & +252 & More combinational gates are used. \\
+DC reference report & NOR cells & 336 & 524 & +188 & More combinational gates are used. \\
+DC reference report & Inverter cells & 594 & 780 & +186 & More inverters are inserted. \\
+DC reference report & Buffer cells & 58 & 79 & +21 & More buffers are inserted. \\
+DC reference report & Sequential cells & 1033 & 1033 & 0 & Sequential mapping is unchanged. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+
+\end{document}

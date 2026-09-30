@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.pdf binary
+docs/REPORT.tex -text whitespace=cr-at-eol
+*.db binary
+*.qdb binary
+*.qpg binary
+*.qtl binary

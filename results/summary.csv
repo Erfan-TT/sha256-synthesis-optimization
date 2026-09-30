@@ -1,0 +1,4 @@
+configuration,clock_period_ns,area_um2,slack_ns,dynamic_power_mw,leakage_power_mw,lvt_percent,svt_percent,hvt_percent
+baseline,2.0,38381.33,0.000203,5.930e-3,1.365e-5,,,
+clock_gating,2.0,28276.83,0.000000,4.437e-3,8.637e-6,100.00,0.00,0.00
+clock_gating_multi_vt,2.0,31294.98,0.000000,4.852e-3,2.180e-6,10.53,7.15,82.32

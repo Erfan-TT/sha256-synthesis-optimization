@@ -1,0 +1,10 @@
+set technology "STcmos65"
+set search_path ""
+lappend search_path "./tech/${technology}"
+
+set libraries ""
+lappend libraries "CORE65LPSVT_nom_1.20V_25C.db"
+lappend libraries "CORE65LPLVT_nom_1.20V_25C.db"
+lappend libraries "CORE65LPHVT_nom_1.20V_25C.db"
+
+lappend link_library [lindex $libraries 1]

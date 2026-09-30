@@ -1,0 +1,26 @@
+name: RTL simulation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+
+      - name: Run SHA-256 regression
+        shell: bash
+        run: |
+          set -o pipefail
+          make sim | tee simulation.log
+          grep -q "All 03 test cases completed successfully" simulation.log

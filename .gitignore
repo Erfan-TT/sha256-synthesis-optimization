@@ -1,0 +1,40 @@
+# Open-source simulation outputs
+/build/
+/work/
+transcript
+*.wlf
+*.vcd
+
+# Synopsys generated data and reports
+/saved/
+*.rpt
+*.log
+*.svf
+*.ddc
+*.mr
+*.pvl
+*.syn
+*.csv
+!results/summary.csv
+
+# Proprietary technology and compiled simulation libraries
+*.db
+*.qdb
+*.qpg
+*.qtl
+_info
+_vmake
+
+# LaTeX build products (the submitted PDF remains tracked)
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+*.toc
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

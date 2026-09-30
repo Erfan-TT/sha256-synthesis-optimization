@@ -45,7 +45,7 @@ module tb_sha256_core();
   //----------------------------------------------------------------
   parameter DEBUG = 0;
 
-  parameter CLK_HALF_PERIOD = 2;
+  parameter CLK_HALF_PERIOD = 1;
   parameter CLK_PERIOD = 2 * CLK_HALF_PERIOD;
 
 
